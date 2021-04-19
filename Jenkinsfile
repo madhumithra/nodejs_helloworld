@@ -32,8 +32,7 @@ pipeline{
             }
         stage('Deploying into k8s'){
             steps{
-                bat 'minikube start'
-                bat 'kubectl apply -f deployment.yaml'
+                 bat 'kubectl apply -f deployment.yaml'
             }
         }
     }
