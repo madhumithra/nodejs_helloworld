@@ -9,7 +9,7 @@ pipeline{
         stage('Build'){
             steps{
                 script{
-                    sh 'npm install'
+                    bat 'npm install'
                 }
             }
         }
@@ -32,7 +32,7 @@ pipeline{
             }
         stage('Deploying into k8s'){
             steps{
-                sh 'kubectl apply -f deployment.yml'
+                bat 'kubectl apply -f deployment.yml'
             }
         }
     }
