@@ -34,7 +34,7 @@ pipeline{
             steps{
                  script 
                     {
-                        kubernetesDeploy(configs: "deployment.yaml", kubeconfigId: "mykubeconfig")
+                        bat 'kubectl apply -f deployment.yaml'
                         }
             }
         }
