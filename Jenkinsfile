@@ -34,7 +34,7 @@ pipeline{
             steps{
                  script 
                     {
-                        bat 'minikube start -driver=docker'
+                        bat 'minikube start'
                         bat 'kubectl apply -f deployment.yaml'
                         }
             }
