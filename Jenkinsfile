@@ -4,12 +4,13 @@ pipeline{
     registryCredential = 'dockerhub'
     dockerImage = ''
   }
+  
   agent any
     stages {
         stage('Build'){
             steps{
                 script{
-                    bat 'npm install'
+                    sh 'npm install'
                 }
             }
         }
@@ -32,11 +33,7 @@ pipeline{
             }
         stage('Deploying into k8s'){
             steps{
-                 script 
-                    {
-                        bat 'minikube start'
-                        bat 'kubectl apply -f deployment.yaml'
-                        }
+                sh 'kubectl apply -f deployment.yml'
             }
         }
     }
