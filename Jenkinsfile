@@ -21,7 +21,7 @@ pipeline {
 kind: Pod
 spec:
   containers:
-  - name:kaniko
+  - name: kaniko
     image: gcr.io/kaniko-project/executor:latest
     args: ["--dockerfile=/workspace/dockerfile",
             "--context=dir://workspace",
