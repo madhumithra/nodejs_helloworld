@@ -1,6 +1,5 @@
 pipeline {
   agent {
-    label 'nodejs1_29-kvhrq'
     kubernetes {
       //cloud 'kubernetes'
       defaultContainer 'kaniko'
