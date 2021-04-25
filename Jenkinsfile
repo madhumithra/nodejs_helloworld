@@ -5,7 +5,13 @@ pipeline{
     dockerImage = ''
   }
   
-  agent any
+  agent{
+    kubernetes {
+            
+            label 'test'
+            yamlFile 'pod.yaml'
+        }
+  }
     stages {
         stage('Build'){
             steps{
