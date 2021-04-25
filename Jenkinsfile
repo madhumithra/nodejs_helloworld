@@ -1,68 +1,40 @@
-pipeline{
-  environment {
-    DOCKER_URL = "madhupixiee/nodejs-helloworld"
-    REGISTRY_NAME = "registry.me"
-    DOCKER_CREDENTIAL_ID = 'dockerhub'
-    DOCKER_IMAGE = "nodejs_helloworld"
-    DOCKER_TAG="3.1"
-    
-    
-  
-  }
-  
-  agent{
-        kubernetes {
+pipeline {
+  agent {
+    kubernetes {
+      //cloud 'kubernetes'
+      defaultContainer 'kaniko'
       yaml """
-apiVersion: v1
 kind: Pod
-metadata:
-  name: kaniko
 spec:
   containers:
-  - name: jnlp
-    image: 'jenkins/jnlp-slave:4.3-4-alpine'
-    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
   - name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
-    args: ["--dockerfile=/workspace/dockerfile",
-            "--context=dir://workspace",
-            "--destination=madhupixiee/nodejs_helloworld"] # replace with your dockerhub account
+    image: gcr.io/kaniko-project/executor:debug-539ddefcae3fd6b411a95982a830d987f4214251
+    imagePullPolicy: Always
+    command:
+    - sleep
+    args:
+    - 9999999
     volumeMounts:
-      - name: kaniko-secret
+      - name: jenkins-docker-cfg
         mountPath: /kaniko/.docker
-      - name: dockerfile-storage
-        mountPath: /workspace
-  restartPolicy: Never
   volumes:
-    - name: kaniko-secret
-      secret:
-        secretName: regcred
-        items:
-          - key: .dockerconfigjson
-            path: config.json
-    - name: dockerfile-storage
-      persistentVolumeClaim:
-        claimName: dockerfile-claim
+  - name: jenkins-docker-cfg
+    projected:
+      sources:
+      - secret:
+          name: regcred
+          items:
+            - key: .dockerconfigjson
+              path: config.json
 """
-        }
     }
-    stages {
-        stage('Build'){
-            steps{
-                script{
-                    sh 'npm install'
-                }
-            }
-        }
-       
-      
-        stage('Deploying into k8s'){
-            steps{
-                container('kaniko') {
-                    /* Kaniko uses secret 'regsecret' declared in the POD to authenticate to the registry and push the image */
-                    sh 'pwd && ls -l && df -h && cat /kaniko/.docker/config.json && /kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=${REGISTRY_NAME}/${DOCKER_IMAGE}:${DOCKER_TAG}'
-                }
-            }
-        }
+  }
+  stages {
+    stage('Build with Kaniko') {
+      steps {
+        git 'https://github.com/madhumithra/nodejs_helloworld.git'
+        sh '/kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=registry.me:5000/nodejs_helloworld:3.5'
+      }
     }
+  }
 }
