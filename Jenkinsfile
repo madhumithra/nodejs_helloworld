@@ -46,7 +46,7 @@ spec:
     stage('Build with Kaniko') {
       steps {
         git 'https://github.com/madhumithra/nodejs_helloworld.git'
-        sh '/kaniko-project/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=registry.me:5000/nodejs_helloworld:5.19'
+        sh 'gcr.io/kaniko-project/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=registry.me:5000/nodejs_helloworld:5.19'
       }
     }
   }
