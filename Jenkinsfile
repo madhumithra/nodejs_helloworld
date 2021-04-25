@@ -45,8 +45,11 @@ spec:
   stages {
     stage('Build with Kaniko') {
       steps {
-        git 'https://github.com/madhumithra/nodejs_helloworld.git'
-        docker run -v `pwd` gcr.io/kaniko-project/executor:latest --insecure --dockerfile=Dockerfile --context= `pwd` --destination=registry.me:5000/nodejs_helloworld:5.1
+        container('kaniko') {
+                    /* Kaniko uses secret 'regsecret' declared in the POD to authenticate to the registry and push the image */
+                    sh 'pwd && ls -l && df -h && cat /kaniko/.docker/config.json && /kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=registry.me:5000/nodejs_helloworld:5.1'
+                }
+        
       }
     }
   }
