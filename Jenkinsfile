@@ -34,9 +34,7 @@ spec:
     volumeMounts:
       - name: kaniko-secret
         mountPath: /kaniko/.docker
-      - name: dockerfile-storage
-        mountPath: /workspace
-  restartPolicy: Never
+   restartPolicy: Never
   volumes:
     - name: kaniko-secret
     projected:
@@ -46,9 +44,7 @@ spec:
         items:
           - key: .dockerconfigjson
             path: config.json
-    - name: dockerfile-storage
-      persistentVolumeClaim:
-        claimName: dockerfile-claim
+    
 """
     }
   }
