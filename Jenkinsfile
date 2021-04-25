@@ -9,6 +9,7 @@ pipeline{
     kubernetes {
             
             label 'test'
+            defaultContainer 'jnlp'
             yamlFile 'pod.yaml'
         }
   }
