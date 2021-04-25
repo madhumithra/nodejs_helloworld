@@ -19,6 +19,9 @@ metadata:
   name: kaniko
 spec:
   containers:
+  - name: jnlp
+    image: 'jenkins/jnlp-slave:4.3-4-alpine'
+    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
   - name: kaniko
     image: gcr.io/kaniko-project/executor:latest
     args: ["--dockerfile=/workspace/dockerfile",
