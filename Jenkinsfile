@@ -16,7 +16,7 @@ pipeline {
     kubernetes {
       //cloud 'kubernetes'
       label 'test'
-      defaultContainer 'kaniko'
+      defaultContainer 'jnlp'
       yaml """
 kind: Pod
 spec:
@@ -50,7 +50,7 @@ spec:
   stages {
     stage('Build with Kaniko') {
       steps {
-        container('kaniko') {
+        script{
                     /* Kaniko uses secret 'regsecret' declared in the POD to authenticate to the registry and push the image */
                     sh '/kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=registry.me:5000/nodejs_helloworld:5.1'
                 }
