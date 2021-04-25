@@ -16,7 +16,7 @@ pipeline {
     kubernetes {
       //cloud 'kubernetes'
       label 'test'
-      defaultContainer 'jnlp'
+      defaultContainer 'kaniko'
       yaml """
 kind: Pod
 spec:
