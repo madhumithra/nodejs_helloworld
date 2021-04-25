@@ -32,17 +32,23 @@ spec:
     args:
     - 9999999
     volumeMounts:
-      - name: jenkins-docker-cfg
+      - name: kaniko-secret
         mountPath: /kaniko/.docker
+      - name: dockerfile-storage
+        mountPath: /workspace
+  restartPolicy: Never
   volumes:
-  - name: jenkins-docker-cfg
+    - name: kaniko-secret
     projected:
       sources:
       - secret:
-          name: regcred
-          items:
-            - key: .dockerconfigjson
-              path: config.json
+          secretName: regcred
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+    - name: dockerfile-storage
+      persistentVolumeClaim:
+        claimName: dockerfile-claim
 """
     }
   }
