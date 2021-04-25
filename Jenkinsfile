@@ -32,11 +32,10 @@ spec:
     args:
     - 9999999
     volumeMounts:
-      - name: kaniko-secret
+      - name: regcred
         mountPath: /kaniko/.docker
-   restartPolicy: Never
-  volumes:
-    - name: kaniko-secret
+    volumes:
+    - name: regcred
     projected:
       sources:
       - secret:
