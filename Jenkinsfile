@@ -1,11 +1,48 @@
 pipeline{
   environment {
-    registry = "madhupixiee/nodejs-helloworld"
-    registryCredential = 'dockerhub'
-    dockerImage = ''
+    DOCKER_URL = "madhupixiee/nodejs-helloworld"
+    REGISTRY_NAME = "registry.me"
+    DOCKER_CREDENTIAL_ID = 'dockerhub'
+    DOCKER_IMAGE = "nodejs_helloworld"
+    DOCKER_TAG="3.1"
+    
+    
+  
   }
   
-  agent any
+  agent{
+        kubernetes {
+      yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko
+spec:
+  containers:
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:latest
+    args: ["--dockerfile=/workspace/dockerfile",
+            "--context=dir://workspace",
+            "--destination=madhupixiee/nodejs_helloworld"] # replace with your dockerhub account
+    volumeMounts:
+      - name: kaniko-secret
+        mountPath: /kaniko/.docker
+      - name: dockerfile-storage
+        mountPath: /workspace
+  restartPolicy: Never
+  volumes:
+    - name: kaniko-secret
+      secret:
+        secretName: regcred
+        items:
+          - key: .dockerconfigjson
+            path: config.json
+    - name: dockerfile-storage
+      persistentVolumeClaim:
+        claimName: dockerfile-claim
+"""
+        }
+    }
     stages {
         stage('Build'){
             steps{
@@ -14,26 +51,14 @@ pipeline{
                 }
             }
         }
-        stage('Building image') {
-            steps{
-                script {
-                  dockerImage = docker.build registry + ":latest"
-                }
-             }
-          }
-          stage('Push Image') {
-              steps{
-                  script 
-                    {
-                        docker.withRegistry( '', registryCredential ) {
-                            dockerImage.push()
-                        }
-                   } 
-               }
-            }
+       
+      
         stage('Deploying into k8s'){
             steps{
-                sh 'sudo kubectl apply -f deployment.yaml'
+                container('kaniko') {
+                    /* Kaniko uses secret 'regsecret' declared in the POD to authenticate to the registry and push the image */
+                    sh 'pwd && ls -l && df -h && cat /kaniko/.docker/config.json && /kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=${REGISTRY_NAME}/${DOCKER_IMAGE}:${DOCKER_TAG}'
+                }
             }
         }
     }
