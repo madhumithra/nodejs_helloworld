@@ -12,50 +12,31 @@
  */
 
 pipeline {
-  agent {
-    kubernetes {
-      //cloud 'kubernetes'
-      label 'test'
-      defaultContainer 'jnlp'
-      yaml """
-kind: Pod
-spec:
-  containers:
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
-    args: ["--dockerfile=/workspace/dockerfile",
-            "--context=dir://workspace",
-            "--destination=madhupixiee/nodejs_helloworld"]
-    imagePullPolicy: Always
-    command:
-    - sleep
-    args:
-    - 9999999
-    volumeMounts:
-      - name: regcred
-        mountPath: /kaniko/.docker
-    volumes:
-    - name: regcred
-    projected:
-      sources:
-      - secret:
-          secretName: regcred
-        items:
-          - key: .dockerconfigjson
-            path: config.json
-    
-"""
-    }
-  }
+  agent any
   stages {
-    stage('Build with Kaniko') {
+    stage('Build ') {
       steps {
         script{
-                    /* Kaniko uses secret 'regsecret' declared in the POD to authenticate to the registry and push the image */
-                    sh '/kaniko/executor -f `pwd`/Dockerfile -c `pwd` --insecure --skip-tls-verify --cache=true --destination=registry.me:5000/nodejs_helloworld:5.1'
+                    bat 'npm install'
                 }
         
       }
     }
+      stage('Test'){
+      steps{
+        script{
+          bat 'npm run test'
+        }
+      }
+    }
+    stage('sonar'){
+      steps{
+        script{
+          bat 'npm install -D sonarqube-scanner'
+          bat 'sonar-scanner -Dsonar.host.url=https://localhost:9000 -Dsonar.login=admin'
+        }
+      }
+    }
+    
   }
 }
